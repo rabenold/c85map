@@ -34,7 +34,9 @@
         map.on('load', () => {
             map.addSource('zipcodes', {
                 type: 'geojson',
-                data:'https://raw.githubusercontent.com/nblmc/massachusetts-municipal-boundaries/main/data-cooked/mass-municipalities.geojson'
+                data: 'https://raw.githubusercontent.com/rabenold/MASS_MAPC_GEOJSON/main/filtered_geojson_file.geojson'
+                
+                //data:'https://raw.githubusercontent.com/nblmc/massachusetts-municipal-boundaries/main/data-cooked/mass-municipalities.geojson'
                 //data: 'https://raw.githubusercontent.com/OpenDataDE/State-zip-code-GeoJSON/master/ma_massachusetts_zip_codes_geo.min.json'
             });
 
