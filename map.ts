@@ -8,11 +8,17 @@
 
     let map;
     let hoveredZipCode = null;
+    let clickedZipCode = null; 
     let popup;
 
     let my_lng = -71.104518; 
     let my_lat = 42.3483995;
     let my_zoom = 10;
+    
+    let highlight_color = '#ff0000';
+    let outline_color = '#39457d';
+
+    
     onMount(() => {
         
         const initState = { lng: my_lng, lat: my_lat, zoom: my_zoom };
@@ -38,7 +44,7 @@
                 source: 'zipcodes',
                 layout: {},
                 paint: {
-                    'line-color': '#000000',
+                    'line-color': outline_color,
                     'line-width': 2,
                     'line-opacity': 0.5
                 }
@@ -53,7 +59,7 @@
                     'fill-color': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        '#ff0000', // Red color when hovered
+                        highlight_color, // Red color when hovered
                         'rgba(0, 0, 0, 0)' // Transparent otherwise
                     ],
                     'fill-opacity': 0.3
@@ -91,11 +97,13 @@
                     map.setPaintProperty(
                         'zipcodes-layer',
                         'line-color',
-                        [
+                        [ 
                             'case',
-                            ['==', ['get', 'massgis_name'], hoveredZipCode],
-                            '#ff0000', // Red color when hovered
-                            '#000000'  // Default color
+                        ['==', ['get', 'massgis_name'], hoveredZipCode],
+                        highlight_color, // Red color when hovered
+                        ['==', ['get', 'massgis_name'], clickedZipCode],
+                            highlight_color, // Red color when clicked
+                        outline_color // Transparent otherwise
                         ]
                     );
 
@@ -106,6 +114,8 @@
                             'case',
                             ['==', ['get', 'massgis_name'], hoveredZipCode],
                             1, // Red color when hovered
+                            ['==', ['get', 'massgis_name'], clickedZipCode],
+                            1,
                             .2  // Default color
                         ]
                     );
@@ -116,8 +126,11 @@
                             'case',
                             ['==', ['get', 'massgis_name'], hoveredZipCode],
                             3, // Red color when hovered
+                            ['==', ['get', 'massgis_name'], clickedZipCode],
+                            3,
                             2  // Default color
                         ]
+
                     );
                 }
             });
@@ -148,17 +161,23 @@
                         .addTo(map);  
                 }
             }); 
-            map.on('click', 'zipcode-fill', (e) => {
-                console.log(e.features[0]);
+    
+    
+    
+    map.on('click', 'zipcode-fill', (e) => {
+        clickedZipCode = e.features[0].properties['massgis_name'];
+        console.log(e.features[0]);
+        document.getElementById("hovered_zip_code").innerHTML = clickedZipCode; 
+
 
     // Get the clicked feature
-    const clickedFeature = e.features[0];
+
 
     // Get the centroid of the polygon geometry
-    const centroid = getPolygonCentroid(clickedFeature.geometry.coordinates[0]);
+    const centroid = getPolygonCentroid(e.features[0].geometry.coordinates[0]);
 
     // Fly to the centroid of the polygon
-    map.flyTo({ center: centroid, zoom: 11 });
+    map.flyTo({ center: centroid, zoom: 10.5});
 });
 
 // Function to calculate the centroid of a polygon
@@ -190,13 +209,26 @@ function getPolygonCentroid(coordinates) {
         });
     });
 
+
+    function calculateZoomLevel(width, height) {
+    // You can define your own logic to calculate the zoom level here
+    // For example, you could base it on the aspect ratio of the viewport or any other criteria
+    // This is just a placeholder example
+    const aspectRatio = width / height;
+    if (aspectRatio < 1) {
+        return 8; // Example zoom level for portrait orientation
+    } else {
+        return 10; // Example zoom level for landscape orientation
+    }
+}
+
 </script>
 
 <style>
     @import url("$lib/global.css");
 </style>
 
-<div class="map_container" style="background-color: grey; float: right; width: 100%; height: 100%;">
-    <div id="map" style="width: 100%; height: 100%;margin:2%"></div>
-    <div id="hovered-zip-code"></div>
-</div>
+<div class="map_container" style="background-color: grey; float: right; width: 100vw; height: 100vw; ">
+    <div id="map"></div>
+    <div id="hovered_zip_code" ></div>
+</div> 
